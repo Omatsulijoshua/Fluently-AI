@@ -4,7 +4,7 @@ services:
     env: docker
     plan: free
     dockerContext: ./services/core-backend
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./services/core-backend/Dockerfile
     envVars:
       - key: PORT
         value: "3000"
