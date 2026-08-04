@@ -14,11 +14,6 @@ services:
         fromDatabase:
           name: fluently-postgres
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: fluently-redis
-          property: connectionString
 
   - type: web
     name: fluently-ai-engine
@@ -31,11 +26,6 @@ services:
         value: "8000"
       - key: ENV
         value: production
-
-  - type: redis
-    name: fluently-redis
-    plan: free
-    ipAllowList: []
 
 databases:
   - name: fluently-postgres
