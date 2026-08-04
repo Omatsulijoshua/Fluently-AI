@@ -1,0 +1,21 @@
+{
+  "name": "fluently-ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fluently AI - The World's Most Advanced AI Language Operating System",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:backend": "cd services/core-backend && npm run start:dev",
+    "dev:ai": "cd services/ai-engine && python main.py",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "verify:phase2": "python scripts/verify_phase2.py"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

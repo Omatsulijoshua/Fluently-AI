@@ -1,0 +1,415 @@
+// Prisma Schema for Fluently AI Operating System Ecosystem
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+// ------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------
+enum UserRole {
+  STUDENT
+  TEACHER
+  PARENT
+  SCHOOL_ADMIN
+  ENTERPRISE_ADMIN
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum CEFRStage {
+  A1_BEGINNER
+  A2_ELEMENTARY
+  B1_INTERMEDIATE
+  B2_UPPER_INTERMEDIATE
+  C1_ADVANCED
+  C2_PROFICIENT
+}
+
+enum ConversationTone {
+  STRICT_MENTOR
+  FRIENDLY_PEER
+  NATIVE_BUDDY
+  EXECUTIVE_COACH
+  KIDS_EXORBITANT
+}
+
+enum MemoryCategory {
+  PRONUNCIATION
+  GRAMMAR
+  VOCABULARY
+  CULTURE
+  PRAGMATICS
+  LISTENING
+}
+
+enum SubmissionStatus {
+  PENDING
+  SUBMITTED
+  EVALUATED_BY_AI
+  REVIEWED_BY_TEACHER
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+// ------------------------------------------------------
+// USER & IDENTITY MANAGEMENT
+// ------------------------------------------------------
+model User {
+  id                String       @id @default(uuid())
+  email             String       @unique
+  passwordHash      String?
+  fullName          String
+  avatarUrl         String?
+  role              UserRole     @default(STUDENT)
+  isEmailVerified   Boolean      @default(false)
+  twoFactorEnabled  Boolean      @default(false)
+  twoFactorSecret   String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  profile           UserProfile?
+  conversations     AIConversationSession[]
+  pronunciationLogs PronunciationErrorLog[]
+  grammarLogs       GrammarErrorLog[]
+  memoryDecays      VocabularyMemoryDecay[]
+  xpLogs            XPLog[]
+  userBadges        UserBadge[]
+  
+  // Portal Relations
+  teacherClassrooms Classroom[]           @relation("TeacherClassrooms")
+  studentClassrooms ClassroomStudent[]
+  parentChildren    ParentChildLink[]     @relation("ParentUser")
+  childParents      ParentChildLink[]     @relation("ChildUser")
+  enterprise        EnterpriseEmployee?
+  submissions       AssignmentSubmission[]
+  subscriptions     Subscription[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id                  String     @id @default(uuid())
+  userId              String     @unique
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  nativeLanguageId    String
+  targetLanguageId    String
+  currentLevel        CEFRStage  @default(A1_BEGINNER)
+  learningStyle       String?    // e.g. Visual, Auditory, Conversational
+  profession          String?
+  dailyGoalMinutes    Int        @default(15)
+  streakDays          Int        @default(0)
+  totalCoins          Int        @default(0)
+  totalXP             Int        @default(0)
+  
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@map("user_profiles")
+}
+
+// ------------------------------------------------------
+// LANGUAGE & LINGUISTIC DOMAIN
+// ------------------------------------------------------
+model Language {
+  id              String      @id @default(uuid())
+  code            String      @unique // e.g., 'en-US', 'es-ES', 'ja-JP'
+  name            String
+  nativeName      String
+  flagEmoji       String?
+  script          String?     // e.g. Latin, Cyrillic, Kanji/Kana, Devanagari
+  isActive        Boolean     @default(true)
+  
+  dialects        Dialect[]
+  words           VocabularyWord[]
+  phonemes        Phoneme[]
+  tutorPersonas   AITutorPersona[]
+
+  @@map("languages")
+}
+
+model Dialect {
+  id          String   @id @default(uuid())
+  languageId  String
+  language    Language @relation(fields: [languageId], references: [id])
+  code        String   // e.g., 'es-AR' (Rioplatense Spanish)
+  name        String
+  region      String
+
+  @@map("dialects")
+}
+
+model VocabularyWord {
+  id            String   @id @default(uuid())
+  languageId    String
+  language      Language @relation(fields: [languageId], references: [id])
+  term          String
+  ipa           String?  // International Phonetic Alphabet representation
+  cefrLevel     CEFRStage @default(A1_BEGINNER)
+  meaning       String
+  exampleSentence String?
+  audioUrl      String?
+
+  memoryDecays  VocabularyMemoryDecay[]
+
+  @@map("vocabulary_words")
+}
+
+model Phoneme {
+  id          String   @id @default(uuid())
+  languageId  String
+  language    Language @relation(fields: [languageId], references: [id])
+  symbol      String   // IPA symbol e.g., /θ/, /r/, /tʃ/
+  description String
+  mouthPositionSvg String?
+
+  pronunciationLogs PronunciationErrorLog[]
+
+  @@map("phonemes")
+}
+
+// ------------------------------------------------------
+// AI CONVERSATION & REAL-TIME AUDIO
+// ------------------------------------------------------
+model AITutorPersona {
+  id             String           @id @default(uuid())
+  languageId     String
+  language       Language         @relation(fields: [languageId], references: [id])
+  name           String
+  avatarUrl      String?
+  defaultTone    ConversationTone @default(FRIENDLY_PEER)
+  systemPrompt   String
+  voiceModelId   String           // ElevenLabs or Kokoro Voice ID
+
+  sessions       AIConversationSession[]
+
+  @@map("ai_tutor_personas")
+}
+
+model AIConversationSession {
+  id          String          @id @default(uuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  personaId   String
+  persona     AITutorPersona  @relation(fields: [personaId], references: [id])
+  topic       String          // e.g. "Airport Check-in", "Medical Exam"
+  cefrLevel   CEFRStage
+  startTime   DateTime        @default(now())
+  endTime     DateTime?
+  
+  messages    AIConversationMessage[]
+
+  @@map("ai_conversation_sessions")
+}
+
+model AIConversationMessage {
+  id          String                @id @default(uuid())
+  sessionId   String
+  session     AIConversationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sender      String                // "USER" or "AI"
+  textContent String
+  audioUrl    String?
+  timestamp   DateTime              @default(now())
+
+  @@map("ai_conversation_messages")
+}
+
+// ------------------------------------------------------
+// AI MEMORY SYSTEM & ERROR LOGS
+// ------------------------------------------------------
+model PronunciationErrorLog {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  phonemeId    String?
+  phoneme      Phoneme? @relation(fields: [phonemeId], references: [id])
+  expectedWord String
+  heardWord    String
+  score        Float    // 0.0 to 100.0 acoustic confidence
+  createdAt    DateTime @default(now())
+
+  @@map("pronunciation_error_logs")
+}
+
+model GrammarErrorLog {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  originalPhrase String
+  correctedPhrase String
+  explanation    String
+  ruleApplied    String?
+  createdAt      DateTime @default(now())
+
+  @@map("grammar_error_logs")
+}
+
+model VocabularyMemoryDecay {
+  id             String         @id @default(uuid())
+  userId         String
+  user           User           @relation(fields: [userId], references: [id])
+  wordId         String
+  word           VocabularyWord @relation(fields: [wordId], references: [id])
+  halfLifeDays   Float          @default(1.0) // SuperMemo / HLR parameter
+  retrievability Float          @default(1.0)
+  recallCount    Int            @default(0)
+  lastReviewedAt DateTime       @default(now())
+
+  @@map("vocabulary_memory_decays")
+}
+
+// ------------------------------------------------------
+// GAMIFICATION
+// ------------------------------------------------------
+model XPLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  reason    String   // e.g. "Completed Pronunciation Drill", "10-day streak bonus"
+  createdAt DateTime @default(now())
+
+  @@map("xp_logs")
+}
+
+model Badge {
+  id          String      @id @default(uuid())
+  title       String
+  description String
+  imageUrl    String
+  userBadges  UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  earnedAt  DateTime @default(now())
+
+  @@map("user_badges")
+}
+
+// ------------------------------------------------------
+// INSTITUTIONAL PORTALS (TEACHER, SCHOOL, PARENT, ENTERPRISE)
+// ------------------------------------------------------
+model School {
+  id          String      @id @default(uuid())
+  name        String
+  address     String?
+  classrooms  Classroom[]
+
+  @@map("schools")
+}
+
+model Classroom {
+  id          String             @id @default(uuid())
+  schoolId    String?
+  school      School?            @relation(fields: [schoolId], references: [id])
+  teacherId   String
+  teacher     User               @relation("TeacherClassrooms", fields: [teacherId], references: [id])
+  name        String
+  code        String             @unique // Classroom join code
+  students    ClassroomStudent[]
+  assignments Assignment[]
+
+  @@map("classrooms")
+}
+
+model ClassroomStudent {
+  id          String    @id @default(uuid())
+  classroomId String
+  classroom   Classroom @relation(fields: [classroomId], references: [id])
+  studentId   String
+  student     User      @relation(fields: [studentId], references: [id])
+
+  @@map("classroom_students")
+}
+
+model Assignment {
+  id          String                 @id @default(uuid())
+  classroomId String
+  classroom   Classroom              @relation(fields: [classroomId], references: [id])
+  title       String
+  description String
+  dueDate     DateTime
+  submissions AssignmentSubmission[]
+
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String           @id @default(uuid())
+  assignmentId String
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id])
+  studentId    String
+  student      User             @relation(fields: [studentId], references: [id])
+  content      String
+  status       SubmissionStatus @default(SUBMITTED)
+  score        Float?
+  aiFeedback   String?
+  submittedAt  DateTime         @default(now())
+
+  @@map("assignment_submissions")
+}
+
+model ParentChildLink {
+  id        String   @id @default(uuid())
+  parentId  String
+  parent    User     @relation("ParentUser", fields: [parentId], references: [id])
+  childId   String
+  child     User     @relation("ChildUser", fields: [childId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("parent_child_links")
+}
+
+model EnterpriseCompany {
+  id        String               @id @default(uuid())
+  name      String
+  domain    String               @unique
+  employees EnterpriseEmployee[]
+
+  @@map("enterprise_companies")
+}
+
+model EnterpriseEmployee {
+  id        String            @id @default(uuid())
+  companyId String
+  company   EnterpriseCompany @relation(fields: [companyId], references: [id])
+  userId    String            @unique
+  user      User              @relation(fields: [userId], references: [id])
+  department String?
+
+  @@map("enterprise_employees")
+}
+
+// ------------------------------------------------------
+// PAYMENTS & SUBSCRIPTIONS
+// ------------------------------------------------------
+model Subscription {
+  id         String             @id @default(uuid())
+  userId     String
+  user       User               @relation(fields: [userId], references: [id])
+  plan       String             // "BASIC", "PRO", "FAMILY", "ENTERPRISE"
+  status     SubscriptionStatus @default(ACTIVE)
+  expiresAt  DateTime
+
+  @@map("subscriptions")
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@fluently/enterprise-portal",
+  "version": "1.0.0",
+  "description": "Fluently AI - Enterprise Platform & Corporate B2B Suite (Next.js 15)",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3006",
+    "build": "next build",
+    "start": "next start -p 3006"
+  },
+  "dependencies": {
+    "@fluently/ui-system": "workspace:*",
+    "next": "^14.1.0 || ^15.0.0",
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.3"
+  }
+}

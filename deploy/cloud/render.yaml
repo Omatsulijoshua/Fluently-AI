@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: fluently-core-backend
+    env: docker
+    dockerContext: ./services/core-backend
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fluently-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: fluently-redis
+          property: connectionString
+
+  - type: web
+    name: fluently-ai-engine
+    env: docker
+    dockerContext: ./services/ai-engine
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: ENV
+        value: production
+
+databases:
+  - name: fluently-postgres
+    databaseName: fluently_db
+    user: fluently_admin
+    ipAllowList: []
+
+services:
+  - type: redis
+    name: fluently-redis
+    ipAllowList: []

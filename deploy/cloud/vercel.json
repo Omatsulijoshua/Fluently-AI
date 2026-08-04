@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/landing-web/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "apps/student-web/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "apps/teacher-portal/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "apps/parent-portal/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "apps/school-portal/package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "apps/enterprise-portal/package.json",
+      "use": "@vercel/next"
+    }
+  ]
+}

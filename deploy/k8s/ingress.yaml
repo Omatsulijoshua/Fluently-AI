@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fluently-ingress
+  namespace: fluently-prod
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: fluently-core-backend-svc
+spec:
+  tls:
+    - hosts:
+        - fluently.ai
+        - api.fluently.ai
+      secretName: fluently-tls-cert
+  rules:
+    - host: api.fluently.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fluently-core-backend-svc
+                port:
+                  number: 3000

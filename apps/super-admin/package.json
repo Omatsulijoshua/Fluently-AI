@@ -1,0 +1,20 @@
+{
+  "name": "@fluently/super-admin",
+  "version": "1.0.0",
+  "description": "Fluently AI - Super Admin Governance & Multi-LLM Router Platform",
+  "private": true,
+  "scripts": {
+    "dev": "vite --port 3007",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@fluently/ui-system": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.0"
+  }
+}

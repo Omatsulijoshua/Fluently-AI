@@ -1,0 +1,74 @@
+/* Fluently AI Design Tokens & Design System Engine */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* HSL Primary Color Palette */
+  --fluently-primary-h: 250;
+  --fluently-primary-s: 85%;
+  --fluently-primary-l: 65%;
+  --fluently-primary: hsl(var(--fluently-primary-h), var(--fluently-primary-s), var(--fluently-primary-l));
+  --fluently-primary-glow: hsla(var(--fluently-primary-h), var(--fluently-primary-s), var(--fluently-primary-l), 0.35);
+
+  /* Neon Accent Colors */
+  --fluently-cyan: #00F2FE;
+  --fluently-emerald: #10B981;
+  --fluently-amber: #F59E0B;
+  --fluently-rose: #F43F5E;
+  --fluently-purple: #8B5CF6;
+
+  /* Surfaces & Backgrounds */
+  --fluently-bg-dark: #0A0D14;
+  --fluently-surface-dark: #121824;
+  --fluently-surface-glass: rgba(18, 24, 36, 0.75);
+  --fluently-border-glass: rgba(255, 255, 255, 0.12);
+  --fluently-text-main: #F8FAFC;
+  --fluently-text-muted: #94A3B8;
+
+  /* Typography */
+  --fluently-font-display: 'Outfit', sans-serif;
+  --fluently-font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* Shadows & Elevation */
+  --fluently-shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --fluently-shadow-glow: 0 0 25px var(--fluently-primary-glow);
+
+  /* Border Radii */
+  --fluently-radius-sm: 8px;
+  --fluently-radius-md: 12px;
+  --fluently-radius-lg: 20px;
+  --fluently-radius-full: 9999px;
+
+  /* Transitions */
+  --fluently-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --fluently-transition-spring: 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body {
+  font-family: var(--fluently-font-body);
+  background-color: var(--fluently-bg-dark);
+  color: var(--fluently-text-main);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism Utility Class */
+.fluently-glass {
+  background: var(--fluently-surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--fluently-border-glass);
+  box-shadow: var(--fluently-shadow-glass);
+  border-radius: var(--fluently-radius-lg);
+}
+
+/* Micro-Hover Animation Utility */
+.fluently-hover-lift {
+  transition: transform var(--fluently-transition-spring), box-shadow var(--fluently-transition-fast);
+}
+
+.fluently-hover-lift:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--fluently-shadow-glow);
+}
