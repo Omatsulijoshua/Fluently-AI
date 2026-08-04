@@ -1,7 +1,7 @@
 {
   "name": "@fluently/landing-web",
   "version": "1.0.0",
-  "description": "Fluently AI - Public Marketing Landing Site (Next.js 15)",
+  "description": "Fluently AI - Official Landing & Marketing Web Application (Next.js 15)",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
@@ -9,6 +9,7 @@
     "start": "next start -p 3001"
   },
   "dependencies": {
+    "@fluently/ui-system": "file:../../packages/ui-system",
     "next": "^14.1.0 || ^15.0.0",
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0"

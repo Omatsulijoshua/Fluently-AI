@@ -8,7 +8,7 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
-    "@fluently/ui-system": "workspace:*",
+    "@fluently/ui-system": "file:../../packages/ui-system",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
