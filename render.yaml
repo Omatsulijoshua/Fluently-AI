@@ -2,6 +2,7 @@ services:
   - type: web
     name: fluently-core-backend
     env: docker
+    plan: free
     dockerContext: ./services/core-backend
     dockerfilePath: Dockerfile
     envVars:
@@ -22,6 +23,7 @@ services:
   - type: web
     name: fluently-ai-engine
     env: docker
+    plan: free
     dockerContext: ./services/ai-engine
     dockerfilePath: Dockerfile
     envVars:
@@ -32,9 +34,11 @@ services:
 
   - type: redis
     name: fluently-redis
+    plan: free
     ipAllowList: []
 
 databases:
   - name: fluently-postgres
     databaseName: fluently_db
     user: fluently_admin
+    plan: free
