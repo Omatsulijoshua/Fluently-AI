@@ -6,7 +6,7 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - key: PORT
-        value: 3000
+        value: "3000"
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
@@ -26,15 +26,15 @@ services:
     dockerfilePath: Dockerfile
     envVars:
       - key: PORT
-        value: 8000
+        value: "8000"
       - key: ENV
         value: production
+
+  - type: redis
+    name: fluently-redis
+    ipAllowList: []
 
 databases:
   - name: fluently-postgres
     databaseName: fluently_db
     user: fluently_admin
-
-services:
-  - type: redis
-    name: fluently-redis
